@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cita Confirmada</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 2.8rem 2.2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .check-wrap {
+      width: 76px; height: 76px;
+      background: rgba(29,158,117,0.18);
+      border: 2px solid #1D9E75;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.4rem;
+      animation: popIn 0.5s 0.2s both;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .check-wrap svg { width: 36px; height: 36px; }
+
+    .titulo {
+      font-size: 15px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+
+    .confirmada {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #5DCAA5;
+      margin-bottom: 0.2rem;
+      text-shadow: 0 0 30px rgba(93,202,165,0.35);
+    }
+
+    .subtitulo {
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin: 1.6rem 0;
+    }
+
+    .fecha-section { margin-bottom: 0.4rem; }
+
+    .label-small {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .fecha-texto {
+      font-size: 19px;
+      font-weight: 600;
+      color: #9FE1CB;
+      margin-bottom: 4px;
+      text-transform: capitalize;
+    }
+
+    .hora-texto {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 0;
+    }
+
+    .countdown-wrap { margin-top: 0.5rem; }
+
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .cd-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px 4px 10px;
+      transition: border-color 0.3s;
+    }
+
+    .cd-box:hover { border-color: rgba(93,202,165,0.35); }
+
+    .cd-num {
+      display: block;
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cd-unit {
+      display: block;
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(29,158,117,0.12);
+      color: #5DCAA5;
+      border: 1px solid rgba(93,202,165,0.25);
+      border-radius: 20px;
+      font-size: 12px;
+      padding: 5px 16px;
+      letter-spacing: 1px;
+      margin-top: 1.8rem;
+    }
+
+    .vencida {
+      font-size: 16px;
+      color: #F0997B;
+      padding: 1rem 0;
+      font-weight: 600;
+    }
+
+    @media (max-width: 400px) {
+      .card { padding: 2rem 1.4rem; }
+      .cd-num { font-size: 24px; }
+      .confirmada { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="check-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  </div>
+
+  <p class="titulo">su cita ha sido</p>
+  <p class="confirmada">confirmada</p>
+  <p class="subtitulo">— appointment confirmed —</p>
+
+  <hr class="divider">
+
+  <div class="fecha-section">
+    <p class="label-small">Fecha de su cita</p>
+    <p class="fecha-texto" id="fecha-texto">Cargando…</p>
+    <p class="hora-texto" id="hora-texto"></p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="countdown-wrap">
+    <p class="label-small" style="margin-bottom:1rem;">Tiempo restante</p>
+    <div class="countdown-grid" id="cd-grid">
+      <div class="cd-box"><span class="cd-num" id="cd-d">--</span><span class="cd-unit">días</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-h">--</span><span class="cd-unit">horas</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-m">--</span><span class="cd-unit">min</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-s">--</span><span class="cd-unit">seg</span></div>
+    </div>
+    <p id="vencida-msg" class="vencida" style="display:none;">Su cita ya pasó</p>
+  </div>
+
+  <div class="badge">✓ &nbsp;Cita activa</div>
+
+</div>
+
+<script>
+  /* ─── Configuración ─────────────────────────────────────────────
+     La fecha se lee del parámetro URL: ?fecha=YYYY-MM-DD&hora=HH:MM
+     Si no hay parámetros, se genera una fecha aleatoria entre
+     15 días y 2 meses y medio desde hoy (para pruebas).
+  ─────────────────────────────────────────────────────────────── */
+
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio',
+                 'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const DIAS  = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+  function parsearFechaURL() {
+    const params = new URLSearchParams(window.location.search);
+    const f = params.get('fecha'); // YYYY-MM-DD
+    const h = params.get('hora');  // HH:MM
+    if (f) {
+      const [y, mo, d] = f.split('-').map(Number);
+      const [hh, mm]   = h ? h.split(':').map(Number) : [10, 30];
+      return new Date(y, mo - 1, d, hh, mm, 0, 0);
+    }
+    return null;
+  }
+
+  function generarFechaAleatoria() {
+    const ahora = Date.now();
+    const minMs = 15 * 86400000;
+    const maxMs = 75 * 86400000;
+    const ms    = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+    const fecha = new Date(ahora + ms);
+    fecha.setHours(10, 30, 0, 0);
+    return fecha;
+  }
+
+  /* Usar fecha de URL o generar aleatoria */
+  const CITA = parsearFechaURL() || generarFechaAleatoria();
+
+  /* Mostrar fecha */
+  const diaSem = DIAS[CITA.getDay()];
+  const dia    = CITA.getDate();
+  const mes    = MESES[CITA.getMonth()];
+  const anio   = CITA.getFullYear();
+  const hh     = String(CITA.getHours()).padStart(2,'0');
+  const mm     = String(CITA.getMinutes()).padStart(2,'0');
+
+  document.getElementById('fecha-texto').textContent =
+    `${diaSem} ${dia} de ${mes} de ${anio}`;
+  document.getElementById('hora-texto').textContent = `${hh}:${mm} hrs`;
+
+  /* Cuenta regresiva */
+  function tick() {
+    const diff = CITA - new Date();
+    if (diff <= 0) {
+      document.getElementById('cd-grid').style.display = 'none';
+      document.getElementById('vencida-msg').style.display = 'block';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd-d').textContent = d;
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
