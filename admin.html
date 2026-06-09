@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Crear Cita</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);font-family:'Segoe UI',system-ui,sans-serif;padding:1.5rem;display:flex;align-items:flex-start;justify-content:center;}
+.card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:2rem 1.8rem;max-width:440px;width:100%;color:#fff;margin-top:1rem;}
+h1{font-size:20px;font-weight:700;color:#5DCAA5;text-align:center;margin-bottom:.3rem;letter-spacing:1px;}
+.sub{font-size:12px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:1.8rem;letter-spacing:2px;text-transform:uppercase;}
+.field{margin-bottom:1.2rem;}
+label{display:block;font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;}
+input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;color:#fff;font-size:15px;outline:none;transition:border .2s;}
+input:focus{border-color:#5DCAA5;}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;}
+.btn{width:100%;background:#1D9E75;border:none;border-radius:12px;padding:14px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:.5rem;letter-spacing:1px;transition:background .2s;}
+.btn:hover{background:#0F6E56;}
+.divider{border:none;border-top:1px solid rgba(255,255,255,.1);margin:1.8rem 0;}
+.resultado{display:none;text-align:center;}
+.resultado.visible{display:block;}
+.qr-wrap{background:#fff;border-radius:16px;padding:16px;display:inline-block;margin-bottom:1.2rem;}
+.nombre-res{font-size:18px;font-weight:700;color:#5DCAA5;margin-bottom:4px;}
+.pasaporte-res{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.8rem;letter-spacing:1px;}
+.fecha-res{font-size:15px;color:#9FE1CB;margin-bottom:1rem;}
+.link-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,.6);word-break:break-all;margin-bottom:1rem;text-align:left;}
+.btn-copy{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:11px;color:#fff;font-size:14px;cursor:pointer;transition:background .2s;}
+.btn-copy:hover{background:rgba(255,255,255,.15);}
+.btn-nueva{width:100%;background:transparent;border:1px solid rgba(93,202,165,.3);border-radius:10px;padding:11px;color:#5DCAA5;font-size:14px;cursor:pointer;margin-top:10px;transition:background .2s;}
+.btn-nueva:hover{background:rgba(93,202,165,.08);}
+.copied{color:#5DCAA5;font-size:13px;margin-top:8px;display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>✦ Panel Admin</h1>
+  <p class="sub">Crear cita para cliente</p>
+
+  <div class="field">
+    <label>Nombre completo del cliente</label>
+    <input type="text" id="nombre" placeholder="Ej: María González" />
+  </div>
+  <div class="field">
+    <label>Número de pasaporte</label>
+    <input type="text" id="pasaporte" placeholder="Ej: AB123456" />
+  </div>
+  <div class="field">
+    <label>Fecha de la cita</label>
+    <input type="date" id="fecha" />
+  </div>
+  <div class="field">
+    <label>Hora de la cita</label>
+    <input type="time" id="hora" value="10:30" />
+  </div>
+
+  <button class="btn" onclick="generarQR()">Generar QR ▶</button>
+
+  <hr class="divider">
+
+  <div class="resultado" id="resultado">
+    <p class="nombre-res" id="res-nombre"></p>
+    <p class="pasaporte-res" id="res-pasaporte"></p>
+    <p class="fecha-res" id="res-fecha"></p>
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+    </div>
+    <div class="link-box" id="link-box"></div>
+    <button class="btn-copy" onclick="copiarLink()">📋 Copiar enlace</button>
+    <p class="copied" id="copied-msg">¡Enlace copiado!</p>
+    <button class="btn-nueva" onclick="nuevaCita()">+ Crear otra cita</button>
+  </div>
+</div>
+
+<script>
+const BASE = 'https://citaconfirmada.github.io/cita/';
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+function setMinMax() {
+  const hoy = new Date();
+  const min = new Date(hoy.getTime() + 15*86400000);
+  const max = new Date(hoy.getTime() + 75*86400000);
+  const fmt = d => d.toISOString().split('T')[0];
+  const inp = document.getElementById('fecha');
+  inp.min = fmt(min);
+  inp.max = fmt(max);
+  inp.value = fmt(min);
+}
+setMinMax();
+
+function generarQR() {
+  const nombre = document.getElementById('nombre').value.trim();
+  const pasaporte = document.getElementById('pasaporte').value.trim();
+  const fecha = document.getElementById('fecha').value;
+  const hora = document.getElementById('hora').value;
+
+  if (!nombre || !pasaporte || !fecha || !hora) {
+    alert('Por favor completa todos los campos.');
+    return;
+  }
+
+  const url = BASE + '?fecha=' + fecha + '&hora=' + hora +
+              '&nombre=' + encodeURIComponent(nombre) +
+              '&pasaporte=' + encodeURIComponent(pasaporte);
+
+  const [y, mo, d] = fecha.split('-').map(Number);
+  const dt = new Date(y, mo-1, d);
+  const fechaTexto = DIAS[dt.getDay()] + ' ' + d + ' de ' + MESES[mo-1] + ' de ' + y;
+
+  document.getElementById('res-nombre').textContent = nombre;
+  document.getElementById('res-pasaporte').textContent = 'Pasaporte: ' + pasaporte;
+  document.getElementById('res-fecha').textContent = fechaTexto + ' · ' + hora + ' hrs';
+  document.getElementById('link-box').textContent = url;
+
+  document.getElementById('qrcode').innerHTML = '';
+  new QRCode(document.getElementById('qrcode'), {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#0f3460',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById('resultado').classList.add('visible');
+  document.getElementById('resultado').scrollIntoView({behavior:'smooth'});
+}
+
+function copiarLink() {
+  const link = document.getElementById('link-box').textContent;
+  navigator.clipboard.writeText(link).then(() => {
+    const msg = document.getElementById('copied-msg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2000);
+  });
+}
+
+function nuevaCita() {
+  document.getElementById('nombre').value = '';
+  document.getElementById('pasaporte').value = '';
+  document.getElementById('resultado').classList.remove('visible');
+  document.getElementById('qrcode').innerHTML = '';
+  setMinMax();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
